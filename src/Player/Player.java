@@ -44,8 +44,12 @@ public class Player {
 		}
 	}
 
-	public void fire(Direction d) {
-		proj.add(new Laser(d, (int) body.getX(), (int) body.getY()));
+	public void fire(int x, int y) {
+		proj.add(new Laser(x, y, (int) body.getX(), (int) body.getY()));
+	}
+	
+	public void fire(Point2D.Float p){
+		proj.add(new Laser(p, body.getX(), body,getY()));
 	}
 
 	public boolean intersects(Rectangle2D r) {
