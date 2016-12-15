@@ -27,10 +27,12 @@ public class Player {
 			velocity.translate(0, yspeed * dir);
 	}
 	
-	public void move(){
+	public void update(){
 		body.x += velocity.getX();
 		body.y += velocity.getY();
 		velocity.setLocation(velocity.getX()*.95, velocity.getY()*.95);
+		for(Projectile p: proj)
+			p.project();
 	}
 
 	public void draw(Graphics2D g) {
