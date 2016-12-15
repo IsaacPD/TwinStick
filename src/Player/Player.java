@@ -7,22 +7,30 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class Player {
-	double health = 100;
-	private double xspeed = 2, yspeed = 2;
+	float health = 100;
+	private Point2D.Float velocity = new Point2D.Float(0, 0);
 	private ArrayList<Projectile> proj = new ArrayList<>();
 
 	Rectangle body;
 
 	public Player() {
-		body = new Rectangle(100, 100, 50, 100);
+		body = new Rectangle2D.Float(100, 100, 50, 50);
 	}
 
 	public void moveX(int dir) {
-		body.x += xspeed * dir;
+		if(velocity.getX() < 5)
+			velocity.translate(xspeed * dir, 0);
 	}
 
 	public void moveY(int dir) {
-		body.y += yspeed * dir;
+		if(velocity.getY() < 5)
+			velocity.translate(0, yspeed * dir);
+	}
+	
+	public void move(){
+		body.x += velocity.getX();
+		body.y += velocity.getY();
+		velocity.setLocation(velocity.getX()*.95, velocity.getY()*.95);
 	}
 
 	public void draw(Graphics2D g) {
@@ -38,15 +46,11 @@ public class Player {
 		proj.add(new Laser(d, (int) body.getX(), (int) body.getY()));
 	}
 
-	public void stop() {
-
-	}
-
-	public boolean intersects(Rectangle r) {
+	public boolean intersects(Rectangle2D r) {
 		return body.intersects(r);
 	}
 
-	public double getHealth() {
+	public float getHealth() {
 		return health;
 	}
 
@@ -54,7 +58,7 @@ public class Player {
 		return proj;
 	}
 
-	public Rectangle getBody() {
+	public Rectangle2D.Float getBody() {
 		return body;
 	}
 }
