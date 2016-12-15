@@ -7,15 +7,14 @@ import java.awt.*;
 public abstract class Projectile extends Rectangle {
 	int speed;
 	public Color color = Color.orange;
-	Direction dir;
+	Point2D.Float dir;
 
-	public Projectile(Direction d) {
-		dir = d;
+	public Projectile(int x, int y) {
+		dir = new Point2D.Float(x, y);
 	}
 
 	public void project() {
-		if (dir.equals(Direction.RIGHT) || dir.equals(Direction.LEFT))
-			this.x += (dir.equals(Direction.RIGHT)) ? speed : -speed;
-		else this.y += (dir.equals(Direction.DOWN)) ? speed : -speed;
+		this.x += dir.getX()*speed;
+		this.y += dir.getY()*speed;
 	}
 }
