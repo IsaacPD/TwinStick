@@ -7,7 +7,7 @@ import java.awt.*;
 public abstract class Projectile extends Rectangle {
 	int speed;
 	public Color color = Color.orange;
-	Point2D.Float dir;
+	private Point2D.Float dir;
 
 	public Projectile(int x, int y) {
 		dir = new Point2D.Float(x, y);
@@ -20,5 +20,9 @@ public abstract class Projectile extends Rectangle {
 	public void project() {
 		this.x += dir.getX()*speed;
 		this.y += dir.getY()*speed;
+	}
+	
+	public Point2D.Float getDir(){
+		return dir;
 	}
 }
