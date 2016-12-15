@@ -39,8 +39,12 @@ public class Player {
 		g.setColor(Color.green);
 		g.fill(body);
 		for (Projectile p : proj) {
+			Point2D.Float dir = p.getDir();
+			float angle = Math.atan(dir.getY()/dir.getX());
+			g.rotate(angle);
 			g.setColor(p.color);
 			g.fill(p);
+			g.rotate(-angle);
 		}
 	}
 
