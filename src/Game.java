@@ -44,11 +44,7 @@ public class Game extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		ArrayList<Projectile> proj = current.getP().getProj();
-		for (Projectile p : proj) {
-			p.project();
-		}
-
+		current.getP().update();
 		repaint();
 	}
 
@@ -68,16 +64,16 @@ public class Game extends JFrame implements ActionListener {
 			Player p = current.getP();
 
 			if (key == KeyEvent.VK_UP)
-				p.fire(Direction.UP);
+				p.fire(0, -1);
 
 			else if (key == KeyEvent.VK_LEFT)
-				p.fire(Direction.LEFT);
+				p.fire(-1, 0);
 
 			else if (key == KeyEvent.VK_RIGHT)
-				p.fire(Direction.RIGHT);
+				p.fire(1, 0);
 
 			else if (key == KeyEvent.VK_DOWN)
-				p.fire(Direction.DOWN);
+				p.fire(1, 0);
 
 			else if (key == KeyEvent.VK_SPACE)
 				if (gtime.isRunning()) gtime.stop();
@@ -110,7 +106,11 @@ public class Game extends JFrame implements ActionListener {
 	public static class MouseAdapter implements MouseListener {
 		@Override
 		public void mouseClicked(MouseEvent e) {
-
+			float x = e.getX(), y = e.getY();
+			float constant = Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 1/2);
+				
+			Point2D.Float unitpoint = new Point(1/constant * x, 1/constant * y)
+			p.fire(unitpoint);
 		}
 
 		@Override
