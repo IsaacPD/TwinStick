@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Level extends JPanel {
-	Player p = new Player();
+	private static final Player p = new Player();
 
 	public Level() {
 		this(Color.white);
@@ -17,7 +17,7 @@ public class Level extends JPanel {
 		setPreferredSize(new Dimension(640, 480));
 	}
 
-	public Player getP() {
+	public static Player getP() {
 		return p;
 	}
 

@@ -1,18 +1,20 @@
-import Effects.Projectile;
 import Environment.Level;
-import Player.Direction;
 import Player.Player;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Game extends JFrame implements ActionListener {
-	ArrayList<Level> levels = new ArrayList<>();
-	Level current;
-	Timer gtime = new Timer(10, this);
-	Timer npc = new Timer(30, this);
+	private ArrayList<Level> levels = new ArrayList<>();
+	private Level current;
+	private Player p;
+	private Timer gtime = new Timer(10, this);
+	private Timer npc = new Timer(30, this);
 
 	public Game() {
 		gtime.setActionCommand("GAME");
@@ -20,6 +22,7 @@ public class Game extends JFrame implements ActionListener {
 
 		levels.add(new Level());
 		current = levels.get(0);
+		p = Level.getP();
 
 		setTitle("Work in progress");
 
@@ -28,6 +31,7 @@ public class Game extends JFrame implements ActionListener {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		addKeyListener(new KAdapter());
+		addMouseListener(new MouseAdapter());
 		pack();
 
 		setResizable(false);
@@ -44,11 +48,8 @@ public class Game extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		ArrayList<Projectile> proj = current.getP().getProj();
-		for (Projectile p : proj) {
-			p.project();
-		}
-
+		if (e.getActionCommand().equals("NPC"))
+			p.update();
 		repaint();
 	}
 
@@ -57,57 +58,61 @@ public class Game extends JFrame implements ActionListener {
 	}
 
 	public class KAdapter implements KeyListener {
+
+		private final Set<Integer> pressed = new HashSet<>();
+
 		@Override
 		public void keyTyped(KeyEvent e) {
 
 		}
 
 		@Override
-		public void keyPressed(KeyEvent k) {
-			int key = k.getKeyCode();
-			Player p = current.getP();
+		public synchronized void keyPressed(KeyEvent k) {
+			pressed.add(k.getKeyCode());
+			if (pressed.size() >= 1) {
+				for (int key : pressed) {
+					if (key == KeyEvent.VK_UP)
+						p.fire(0, -1);
 
-			if (key == KeyEvent.VK_UP)
-				p.fire(Direction.UP);
+					else if (key == KeyEvent.VK_LEFT)
+						p.fire(-1, 0);
 
-			else if (key == KeyEvent.VK_LEFT)
-				p.fire(Direction.LEFT);
+					else if (key == KeyEvent.VK_RIGHT)
+						p.fire(1, 0);
 
-			else if (key == KeyEvent.VK_RIGHT)
-				p.fire(Direction.RIGHT);
+					else if (key == KeyEvent.VK_DOWN)
+						p.fire(0, 1);
 
-			else if (key == KeyEvent.VK_DOWN)
-				p.fire(Direction.DOWN);
+					else if (key == KeyEvent.VK_SPACE)
+						if (gtime.isRunning()) gtime.stop();
+						else gtime.start();
 
-			else if (key == KeyEvent.VK_SPACE)
-				if (gtime.isRunning()) gtime.stop();
-				else gtime.start();
+					else if (key == KeyEvent.VK_W)
+						p.moveY(-1);
 
-			else if (key == KeyEvent.VK_W)
-				p.moveY(-1);
+					else if (key == KeyEvent.VK_A)
+						p.moveX(-1);
 
-			else if (key == KeyEvent.VK_A)
-				p.moveX(-1);
+					else if (key == KeyEvent.VK_D)
+						p.moveX(1);
 
-			else if (key == KeyEvent.VK_D)
-				p.moveX(1);
-
-			else if (key == KeyEvent.VK_S)
-				p.moveY(1);
-			else if (key == KeyEvent.VK_1)
-				levels.add(new Level(Color.cyan));
-			else if (key == KeyEvent.VK_2)
-				loadLevel(levels.size() - 1);
-			repaint();
+					else if (key == KeyEvent.VK_S)
+						p.moveY(1);
+					else if (key == KeyEvent.VK_1)
+						levels.add(new Level(Color.cyan));
+					else if (key == KeyEvent.VK_2)
+						loadLevel(levels.size() - 1);
+				}
+			}
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-
+			pressed.remove(e.getKeyCode());
 		}
 	}
 
-	public static class MouseAdapter implements MouseListener {
+	public class MouseAdapter implements MouseListener {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 
@@ -115,7 +120,13 @@ public class Game extends JFrame implements ActionListener {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+			double x = e.getX() - p.getBody().x, y = e.getY() - p.getBody().y;
+			double constant = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+			x = 1 / constant * x;
+			y = 1 / constant * y;
 
+			Point2D.Double unitPoint = new Point2D.Double(x, y);
+			p.fire(unitPoint);
 		}
 
 		@Override
