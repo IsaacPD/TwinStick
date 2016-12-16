@@ -6,15 +6,17 @@ import java.awt.geom.Rectangle2D;
 
 public abstract class Projectile extends Rectangle2D.Double {
 	int speed;
-	public Color color = Color.orange;
+	public int distance = 300;
+
+	private Color color = Color.orange;
 	private Point2D.Double dir, start;
 
-	public Projectile(double x, double y, double startX, double startY) {
+	Projectile(double x, double y, double startX, double startY) {
 		dir = new Point2D.Double(x, y);
 		start = new Point2D.Double(startX, startY);
 	}
 
-	public Projectile(Point2D.Double p, double startX, double startY) {
+	Projectile(Point2D.Double p, double startX, double startY) {
 		dir = p;
 		start = new Point2D.Double(startX, startY);
 	}
@@ -22,6 +24,7 @@ public abstract class Projectile extends Rectangle2D.Double {
 	public void project() {
 		start.x += dir.getX() * speed;
 		start.y += dir.getY() * speed;
+		distance -= speed;
 	}
 
 	public void draw(Graphics2D g) {

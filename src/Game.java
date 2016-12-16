@@ -15,10 +15,17 @@ public class Game extends JFrame implements ActionListener {
 	private Player p;
 	private Timer gtime = new Timer(10, this);
 	private Timer npc = new Timer(30, this);
+	public static int width, height;
 
 	public Game() {
+		setSize(640, 480);
+
 		gtime.setActionCommand("GAME");
 		npc.setActionCommand("NPC");
+
+		Dimension d = this.getSize();
+		width = d.width;
+		height = d.height;
 
 		levels.add(new Level());
 		current = levels.get(0);
@@ -30,12 +37,14 @@ public class Game extends JFrame implements ActionListener {
 
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		addKeyListener(new KAdapter());
+		addKeyListener(new PlayerAdapter());
+		addKeyListener(new ProjAdapter());
 		addMouseListener(new MouseAdapter());
 		pack();
 
-		setResizable(false);
+		setResizable(true);
 		setVisible(true);
+
 		npc.start();
 	}
 
@@ -51,13 +60,17 @@ public class Game extends JFrame implements ActionListener {
 		if (e.getActionCommand().equals("NPC"))
 			p.update();
 		repaint();
+
+		Dimension d = this.getSize();
+		width = d.width;
+		height = d.height;
 	}
 
 	public static void main(String... args) {
 		Game g = new Game();
 	}
 
-	public class KAdapter implements KeyListener {
+	public class PlayerAdapter implements KeyListener {
 
 		private final Set<Integer> pressed = new HashSet<>();
 
@@ -71,23 +84,8 @@ public class Game extends JFrame implements ActionListener {
 			pressed.add(k.getKeyCode());
 			if (pressed.size() >= 1) {
 				for (int key : pressed) {
-					if (key == KeyEvent.VK_UP)
-						p.fire(0, -1);
 
-					else if (key == KeyEvent.VK_LEFT)
-						p.fire(-1, 0);
-
-					else if (key == KeyEvent.VK_RIGHT)
-						p.fire(1, 0);
-
-					else if (key == KeyEvent.VK_DOWN)
-						p.fire(0, 1);
-
-					else if (key == KeyEvent.VK_SPACE)
-						if (gtime.isRunning()) gtime.stop();
-						else gtime.start();
-
-					else if (key == KeyEvent.VK_W)
+					if (key == KeyEvent.VK_W)
 						p.moveY(-1);
 
 					else if (key == KeyEvent.VK_A)
@@ -141,6 +139,38 @@ public class Game extends JFrame implements ActionListener {
 
 		@Override
 		public void mouseExited(MouseEvent e) {
+
+		}
+	}
+
+	private class ProjAdapter implements KeyListener {
+		@Override
+		public void keyTyped(KeyEvent e) {
+
+		}
+
+		@Override
+		public void keyPressed(KeyEvent k) {
+			int key = k.getKeyCode();
+			if (key == KeyEvent.VK_UP)
+				p.fire(0, -1);
+
+			else if (key == KeyEvent.VK_LEFT)
+				p.fire(-1, 0);
+
+			else if (key == KeyEvent.VK_RIGHT)
+				p.fire(1, 0);
+
+			else if (key == KeyEvent.VK_DOWN)
+				p.fire(0, 1);
+
+			else if (key == KeyEvent.VK_SPACE)
+				if (gtime.isRunning()) gtime.stop();
+				else gtime.start();
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
 
 		}
 	}
