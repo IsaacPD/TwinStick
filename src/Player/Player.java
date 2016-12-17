@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
@@ -18,14 +19,22 @@ import java.util.ArrayList;
 
 import static javax.imageio.ImageIO.read;
 
-//TODO add collision to enemies or vice versa (add collision to player from enemies)
 public class Player {
+	public double health = 100;
 	private Timer invinsible = new Timer(1000, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			invinsible.stop();
 		}
 	});
+	private double friction = .85, maxSpeed = 15, speed = 4;
+	private Point2D.Double velocity = new Point2D.Double(0, 0);
+	private ArrayList<Projectile> proj = new ArrayList<>();
+
+	private int playerSize = 90, frame = 0;
+	private float[] transform = {playerSize / 30, 0, 0, playerSize / 30, 0, 0};
+	private Rectangle2D.Double body;
+	private ArrayList<BufferedImage> looks = new ArrayList<>();
 	private Timer idle = new Timer(500, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -33,20 +42,10 @@ public class Player {
 		}
 	});
 
-	double health = 100;
-	private double friction = .75, maxSpeed = 15, speed = 3;
-	private Point2D.Double velocity = new Point2D.Double(0, 0);
-	private ArrayList<Projectile> proj = new ArrayList<>();
-
-	private int playerSize = 150, frame = 0;
-	private float[] transform = {playerSize / 30, 0, 0, playerSize / 30, 0, 0};
-	private Rectangle2D.Double body;
-	private ArrayList<BufferedImage> looks = new ArrayList<>();
-
 	public Player() {
 		body = new Rectangle2D.Double(100, 100, playerSize, playerSize);
 		try {
-			//look[4] = ImageIO.read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
+			//look.add(read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
 			looks.add(read(new File("originalcharacter.png")));
 			looks.add(read(new File("girl.png")));
 			looks.add(read(new File("ghost1.png")));
@@ -57,14 +56,14 @@ public class Player {
 	}
 
 	public void resetPos() {
-		body.x = 250;
-		body.y = 250;
+		body.x = 100;
+		body.y = 100;
 	}
 
 	public void moveX(int dir) {
 		if (Math.abs(velocity.getX()) < maxSpeed)
 			velocity.x += dir * speed;
-		else if (velocity.getX() > 0)
+		else if (velocity.getX() > maxSpeed)
 			velocity.x = maxSpeed;
 		else velocity.x = -maxSpeed;
 	}
@@ -72,7 +71,7 @@ public class Player {
 	public void moveY(int dir) {
 		if (Math.abs(velocity.getY()) < maxSpeed)
 			velocity.y += dir * speed;
-		else if (velocity.getY() > 0)
+		else if (velocity.getY() > maxSpeed)
 			velocity.y = maxSpeed;
 		else velocity.y = -maxSpeed;
 	}
@@ -80,19 +79,24 @@ public class Player {
 	public void update() {
 		body.x += velocity.getX();
 		body.y += velocity.getY();
-		velocity.setLocation(velocity.getX() * friction, velocity.getY() * friction);
-		if (Math.abs(velocity.x) < .1)
-			velocity.x = 0;
-		if (Math.abs(velocity.y) < .1)
-			velocity.y = 0;
+
 		for (Projectile p : proj)
 			p.project();
 		removeProj();
 	}
 
+	public void slow() {
+		velocity.setLocation(velocity.getX() * friction, velocity.getY() * friction);
+		if (Math.abs(velocity.x) < .1)
+			velocity.x = 0;
+		if (Math.abs(velocity.y) < .1)
+			velocity.y = 0;
+	}
+
 	public void draw(Graphics2D g) {
 		g.drawImage(looks.get(frame), new AffineTransformOp(new AffineTransform(transform),
 				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), (int) body.x, (int) body.y);
+		g.draw(body);
 		drawHealth(g);
 		for (Projectile p : proj) {
 			p.draw(g);
@@ -100,16 +104,21 @@ public class Player {
 	}
 
 	public void fire(int x, int y) {
-		proj.add(new Laser(x, y, body.x + playerSize / 2, body.y + playerSize / 2));
+		proj.add(new Laser(x, y, body.getCenterX(), body.getCenterY()));
 	}
 
 	public void fire(Point2D.Double p) {
-		proj.add(new Laser(p, body.x + playerSize / 2, body.y + playerSize / 2));
+		proj.add(new Laser(p, body.getCenterX(), body.getCenterY()));
 	}
 
-	public void bounce() {
-		body.x -= 30;
-		body.y -= 30;
+	//TODO push player outside of border entirely rather than a distance
+	public void bounce(Line2D.Double l) {
+		System.out.println(velocity.x + ", " + velocity.y);
+		double angle = Math.atan((l.getY2() - l.getY1()) / (l.getX2() - l.getX1()));
+
+		velocity.y *= -Math.sin(angle);
+		velocity.x *= -Math.cos(angle);
+		System.out.println(velocity.x + ", " + velocity.y);
 	}
 
 	public boolean gotHit(Enemy e) {
@@ -124,17 +133,19 @@ public class Player {
 
 	public boolean hit(Enemy e) {
 		for (Projectile p : proj)
-			if (e.intersects(p.getStart().x, p.getStart().y, p.width, p.height))
+			if (e.intersects(p.getStart().x, p.getStart().y, p.width, p.height)) {
+				proj.remove(p);
 				return true;
+			}
 		return false;
-	}
-
-	public double getHealth() {
-		return health;
 	}
 
 	public Rectangle2D.Double getBody() {
 		return body;
+	}
+
+	public void clear() {
+		proj.clear();
 	}
 
 	private void removeProj() {

@@ -14,17 +14,18 @@ import java.io.IOException;
 public class Snake extends Enemy {
 
 	BufferedImage look;
-	int size = 30;
-	float[] transform = {size / 30, 0, 0, size / 30, 0, 0};
 
 	public Snake() {
-		body = new Rectangle(300, 300, 100, 100);
+		size = 100;
+		body = new Rectangle(300, 300, size, size);
 		health = 20;
 		try {
 			look = ImageIO.read(new File("devil.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		hitBox = new Border(body);
 	}
 
 	public void script() {
@@ -33,23 +34,25 @@ public class Snake extends Enemy {
 
 	@Override
 	public void draw(Graphics2D g) {
+		float[] transform = {size / 30, 0, 0, size / 30, 0, 0};
+
 		g.drawImage(look, new AffineTransformOp(new AffineTransform(transform),
 				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), body.x, body.y);
 		g.fill(body);
+		hitBox.draw(g);
 		drawHealth(g);
 	}
 
 	@Override
 	public boolean hitPlayer() {
-		return body.intersects(Level.getP().getBody());
+		return crosses() != null;
 	}
 
 	@Override
 	public boolean gotHit() {
-		if (Level.getP().hit(this) && !invinsible.isRunning()) {
+		if (Level.getP().hit(this)) {
 			health -= 5;
 			System.out.println("Snake: " + health);
-			invinsible.start();
 			return true;
 		}
 		return false;

@@ -6,8 +6,11 @@ import Player.Player;
 import javax.swing.*;
 import java.awt.*;
 
+//TODO randomly generate levels/maps with multiple rooms
 public class Level extends JPanel {
-	public static final Player p = new Player();
+	private static final Player p = new Player();
+	public static Room current;
+	public static int rooms = 10;
 	public Room start;
 
 	public Level() {
@@ -15,34 +18,21 @@ public class Level extends JPanel {
 		setPreferredSize(new Dimension(640, 480));
 	}
 
-	public Level(Color c) {
-		setBackground(c);
-		setPreferredSize(new Dimension(640, 480));
-		initialize();
-	}
-
 	public static Player getP() {
 		return p;
 	}
 
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		Graphics2D g2 = (Graphics2D) g;
-		Color player = Color.green;
-
-		start.paintComponent(g);
-
-		g2.setColor(player);
-		p.draw(g2);
+	public static Color randomColor() {
+		return new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
 	}
 
-	public void initialize() {
+	private void initialize() {
 		start = new Room(Color.pink);
-		start.setEast(new Room(start, Color.magenta, -1));
-		start.setWest(new Room(start, Color.RED, 1));
-		start.setNorth(new Room(start, new Color(255, 255, 0), 2));
-		start.setSouth(new Room(start, Color.black, -2));
-		start.getEnemies().add(new Snake());
+		/*start.setEast(new Room(start, Color.magenta, 4));
+		start.setWest(new Room(start, Color.RED, 6));
+		start.setNorth(new Room(start, 2));
+		start.setSouth(new Room(start, Color.black, 8));*/
+		//start.getEnemies().add(new Snake());
+		current = start;
 	}
 }

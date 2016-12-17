@@ -5,9 +5,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 public abstract class Projectile extends Rectangle2D.Double {
-	int speed;
 	public int distance = 300;
-
+	int speed;
 	private Color color = Color.orange;
 	private Point2D.Double dir, start;
 
@@ -31,13 +30,17 @@ public abstract class Projectile extends Rectangle2D.Double {
 		double angle = Math.PI / 2 - Math.atan(dir.y / dir.x);
 		g.translate(start.x, start.y);
 
-		//TODO Make it project from center of circle and make mouse projectiles come out at the correct angle
-		g.rotate(angle);
+		if (dir.x != 0 && dir.y != 0)
+			g.rotate(-angle);
+		else g.rotate(angle);
 
 		g.setColor(color);
 		g.fill(this);
 
-		g.rotate(-angle);
+		if (dir.x != 0 && dir.y != 0)
+			g.rotate(angle);
+		else g.rotate(-angle);
+
 		g.translate(-start.x, -start.y);
 	}
 

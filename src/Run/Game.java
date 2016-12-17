@@ -1,5 +1,6 @@
+package Run;
+
 import Environment.Level;
-import Environment.Room;
 import Player.Player;
 
 import javax.swing.*;
@@ -9,23 +10,23 @@ import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.Set;
 
+import static Environment.Level.current;
+
+//TODO make game scale with screen size and adjust projectile speeds
+//TODO loadLevel() when entering room
 public class Game extends JFrame implements ActionListener {
+	public static int width = 640, height = 480;
+	private final Player p;
+	private final Timer npc = new Timer(30, this);
+	private final Timer airTimer = new Timer(30, this);
 	private Level levels = new Level();
-	private Room current;
-	private Player p;
-	private Timer gtime = new Timer(10, this);
-	private Timer npc = new Timer(30, this);
-	public static int width, height;
+	private int airTime = 0;
 
 	public Game() {
-		setSize(640, 480);
+		setSize(width, height);
 
-		gtime.setActionCommand("GAME");
 		npc.setActionCommand("NPC");
-
-		Dimension d = this.getSize();
-		width = d.width;
-		height = d.height;
+		airTimer.setActionCommand("Air");
 
 		current = levels.start;
 		p = Level.getP();
@@ -37,7 +38,6 @@ public class Game extends JFrame implements ActionListener {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		addKeyListener(new PlayerAdapter());
-		addKeyListener(new ProjAdapter());
 		addMouseListener(new MouseAdapter());
 		pack();
 
@@ -45,6 +45,11 @@ public class Game extends JFrame implements ActionListener {
 		setVisible(true);
 
 		npc.start();
+		airTimer.start();
+	}
+
+	public static void main(String... args) {
+		Game g = new Game();
 	}
 
 	public void loadLevel(int index) {
@@ -54,38 +59,35 @@ public class Game extends JFrame implements ActionListener {
 						(index == 2) ? current.getSouth()
 								: current.getNorth();
 		add(current);
+		p.clear();
 		pack();
 		setVisible(true);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("NPC"))
-			p.update();
+		if (airTime > 0 && e.getActionCommand().equals("Air"))
+			airTime = (airTime + 1) % 18;
 
 		Dimension d = this.getSize();
 		width = d.width;
 		height = d.height;
 
-		if (p.getBody().x < 0) {
+		if (p.getBody().x < -15) {
 			loadLevel(-1);
 			p.resetPos();
-		} else if (p.getBody().x > Game.width) {
+		} else if (p.getBody().x > Game.width + 15) {
 			loadLevel(1);
 			p.resetPos();
-		} else if (p.getBody().y < 0) {
+		} else if (p.getBody().y < -15) {
 			loadLevel(-2);
 			p.resetPos();
-		} else if (p.getBody().y > Game.height) {
+		} else if (p.getBody().y > Game.height + 15) {
 			loadLevel(2);
 			p.resetPos();
 		}
 
 		repaint();
-	}
-
-	public static void main(String... args) {
-		Game g = new Game();
 	}
 
 	public class PlayerAdapter implements KeyListener {
@@ -114,6 +116,24 @@ public class Game extends JFrame implements ActionListener {
 
 					else if (key == KeyEvent.VK_S)
 						p.moveY(1);
+
+					else if (key == KeyEvent.VK_UP && airTime == 0) {
+						p.fire(0, -1);
+						airTime++;
+					} else if (key == KeyEvent.VK_LEFT && airTime == 0) {
+						p.fire(-1, 0);
+						airTime++;
+					} else if (key == KeyEvent.VK_RIGHT && airTime == 0) {
+						p.fire(1, 0);
+						airTime++;
+					} else if (key == KeyEvent.VK_DOWN && airTime == 0) {
+						p.fire(0, 1);
+						airTime++;
+					}
+
+					/*else if (key == KeyEvent.VK_SPACE)
+						if (gTime.isRunning()) gTime.stop();
+						else gTime.start();*/
 
 					else if (key == KeyEvent.VK_8)
 						loadLevel(-2);
@@ -144,7 +164,7 @@ public class Game extends JFrame implements ActionListener {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			double x = e.getX() - p.getBody().x, y = e.getY() - p.getBody().y;
+			double x = e.getX() - p.getBody().getCenterX(), y = e.getY() - p.getBody().getCenterY();
 			double constant = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 			x = 1 / constant * x;
 			y = 1 / constant * y;
@@ -165,38 +185,6 @@ public class Game extends JFrame implements ActionListener {
 
 		@Override
 		public void mouseExited(MouseEvent e) {
-
-		}
-	}
-
-	private class ProjAdapter implements KeyListener {
-		@Override
-		public void keyTyped(KeyEvent e) {
-
-		}
-
-		@Override
-		public void keyPressed(KeyEvent k) {
-			int key = k.getKeyCode();
-			if (key == KeyEvent.VK_UP)
-				p.fire(0, -1);
-
-			else if (key == KeyEvent.VK_LEFT)
-				p.fire(-1, 0);
-
-			else if (key == KeyEvent.VK_RIGHT)
-				p.fire(1, 0);
-
-			else if (key == KeyEvent.VK_DOWN)
-				p.fire(0, 1);
-
-			else if (key == KeyEvent.VK_SPACE)
-				if (gtime.isRunning()) gtime.stop();
-				else gtime.start();
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
 
 		}
 	}

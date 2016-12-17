@@ -4,7 +4,7 @@ package Effects;
 import java.awt.geom.Point2D;
 
 public class Laser extends Projectile {
-	final int WIDTH = 10, HEIGHT = 30, SPEED = 5;
+	private final int WIDTH = 10, HEIGHT = 30, SPEED = 1;
 
 	public Laser(double vx, double vy, double x, double y) {
 		super(vx, vy, x, y);
