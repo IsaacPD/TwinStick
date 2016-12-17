@@ -2,16 +2,29 @@ package Obstacles;
 
 import Environment.Level;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 
 public class Snake extends Enemy {
 
-	private ArrayList<Rectangle> body = new ArrayList<>();
+	BufferedImage look;
+	int size = 30;
+	float[] transform = {size / 30, 0, 0, size / 30, 0, 0};
 
 	public Snake() {
-		body.add(new Rectangle(300, 300, 30, 10));
+		body = new Rectangle(300, 300, 100, 100);
 		health = 20;
+		try {
+			look = ImageIO.read(new File("devil.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void script() {
@@ -19,14 +32,16 @@ public class Snake extends Enemy {
 	}
 
 	@Override
-	public void draw(Graphics2D g2) {
-		g2.setColor(Color.magenta);
-		g2.fill(body.get(0));
+	public void draw(Graphics2D g) {
+		g.drawImage(look, new AffineTransformOp(new AffineTransform(transform),
+				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), body.x, body.y);
+		g.fill(body);
+		drawHealth(g);
 	}
 
 	@Override
 	public boolean hitPlayer() {
-		return body.get(0).intersects(Level.getP().getBody());
+		return body.intersects(Level.getP().getBody());
 	}
 
 	@Override
@@ -42,6 +57,6 @@ public class Snake extends Enemy {
 
 	@Override
 	public boolean intersects(double x, double y, double w, double h) {
-		return body.get(0).intersects(x, y, w, h);
+		return body.intersects(x, y, w, h);
 	}
 }

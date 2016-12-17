@@ -1,17 +1,17 @@
 import Environment.Level;
+import Environment.Room;
 import Player.Player;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Game extends JFrame implements ActionListener {
-	private ArrayList<Level> levels = new ArrayList<>();
-	private Level current;
+	private Level levels = new Level();
+	private Room current;
 	private Player p;
 	private Timer gtime = new Timer(10, this);
 	private Timer npc = new Timer(30, this);
@@ -27,8 +27,7 @@ public class Game extends JFrame implements ActionListener {
 		width = d.width;
 		height = d.height;
 
-		levels.add(new Level());
-		current = levels.get(0);
+		current = levels.start;
 		p = Level.getP();
 
 		setTitle("Work in progress");
@@ -50,8 +49,12 @@ public class Game extends JFrame implements ActionListener {
 
 	public void loadLevel(int index) {
 		remove(current);
-		current = levels.get(index);
+		current = (index == -1) ? current.getWest() :
+				(index == 1) ? current.getEast() :
+						(index == 2) ? current.getSouth()
+								: current.getNorth();
 		add(current);
+		pack();
 		setVisible(true);
 	}
 
@@ -59,11 +62,26 @@ public class Game extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("NPC"))
 			p.update();
-		repaint();
 
 		Dimension d = this.getSize();
 		width = d.width;
 		height = d.height;
+
+		if (p.getBody().x < 0) {
+			loadLevel(-1);
+			p.resetPos();
+		} else if (p.getBody().x > Game.width) {
+			loadLevel(1);
+			p.resetPos();
+		} else if (p.getBody().y < 0) {
+			loadLevel(-2);
+			p.resetPos();
+		} else if (p.getBody().y > Game.height) {
+			loadLevel(2);
+			p.resetPos();
+		}
+
+		repaint();
 	}
 
 	public static void main(String... args) {
@@ -96,10 +114,18 @@ public class Game extends JFrame implements ActionListener {
 
 					else if (key == KeyEvent.VK_S)
 						p.moveY(1);
-					else if (key == KeyEvent.VK_1)
-						levels.add(new Level(Color.cyan));
+
+					else if (key == KeyEvent.VK_8)
+						loadLevel(-2);
+
+					else if (key == KeyEvent.VK_4)
+						loadLevel(-1);
+
 					else if (key == KeyEvent.VK_2)
-						loadLevel(levels.size() - 1);
+						loadLevel(2);
+
+					else if (key == KeyEvent.VK_6)
+						loadLevel(1);
 				}
 			}
 		}

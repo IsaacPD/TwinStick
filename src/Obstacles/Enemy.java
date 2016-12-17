@@ -13,6 +13,7 @@ public abstract class Enemy extends Rectangle2D.Double {
 			invinsible.stop();
 		}
 	});
+	Rectangle body;
 
 	double health;
 
@@ -29,4 +30,12 @@ public abstract class Enemy extends Rectangle2D.Double {
 	}
 
 	public abstract void draw(Graphics2D g2);
+
+	public void drawHealth(Graphics2D g) {
+		g.setColor(Color.red);
+		g.translate(body.x, body.y);
+		Rectangle2D.Double bar = new Rectangle2D.Double(3, -10, health, 5);
+		g.fill(bar);
+		g.translate(-body.x, -body.y);
+	}
 }

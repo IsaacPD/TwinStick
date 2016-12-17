@@ -1,25 +1,24 @@
 package Environment;
 
-import Obstacles.Enemy;
 import Obstacles.Snake;
 import Player.Player;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class Level extends JPanel {
-	private static final Player p = new Player();
-	private ArrayList<Enemy> enemies = new ArrayList<>();
+	public static final Player p = new Player();
+	public Room start;
 
 	public Level() {
-		this(Color.white);
-		enemies.add(new Snake());
+		initialize();
+		setPreferredSize(new Dimension(640, 480));
 	}
 
 	public Level(Color c) {
 		setBackground(c);
 		setPreferredSize(new Dimension(640, 480));
+		initialize();
 	}
 
 	public static Player getP() {
@@ -32,20 +31,18 @@ public class Level extends JPanel {
 		Graphics2D g2 = (Graphics2D) g;
 		Color player = Color.green;
 
-		for (int i = 0; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
-			boolean gone = false;
-
-			if (p.gotHit(e))
-				player = Color.red;
-			if (e.gotHit())
-				if (e.getHealth() <= 0)
-					gone = enemies.remove(e);
-			if (!gone)
-				e.draw(g2);
-		}
+		start.paintComponent(g);
 
 		g2.setColor(player);
 		p.draw(g2);
+	}
+
+	public void initialize() {
+		start = new Room(Color.pink);
+		start.setEast(new Room(start, Color.magenta, -1));
+		start.setWest(new Room(start, Color.RED, 1));
+		start.setNorth(new Room(start, new Color(255, 255, 0), 2));
+		start.setSouth(new Room(start, Color.black, -2));
+		start.getEnemies().add(new Snake());
 	}
 }

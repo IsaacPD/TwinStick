@@ -20,7 +20,7 @@ import static javax.imageio.ImageIO.read;
 
 //TODO add collision to enemies or vice versa (add collision to player from enemies)
 public class Player {
-	private Timer invinsible = new Timer(3000, new AbstractAction() {
+	private Timer invinsible = new Timer(1000, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			invinsible.stop();
@@ -29,9 +29,7 @@ public class Player {
 	private Timer idle = new Timer(500, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			BufferedImage temp = look[1];
-			look[1] = look[0];
-			look[0] = temp;
+			frame = (frame + 1) % looks.size();
 		}
 	});
 
@@ -40,21 +38,27 @@ public class Player {
 	private Point2D.Double velocity = new Point2D.Double(0, 0);
 	private ArrayList<Projectile> proj = new ArrayList<>();
 
-	private int playerSize = 150;
+	private int playerSize = 150, frame = 0;
 	private float[] transform = {playerSize / 30, 0, 0, playerSize / 30, 0, 0};
 	private Rectangle2D.Double body;
-	private BufferedImage[] look = new BufferedImage[10];
+	private ArrayList<BufferedImage> looks = new ArrayList<>();
 
 	public Player() {
 		body = new Rectangle2D.Double(100, 100, playerSize, playerSize);
 		try {
-			//look = ImageIO.read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
-			look[0] = read(new File("originalcharacter.png"));
-			look[1] = read(new File("girl.png"));
+			//look[4] = ImageIO.read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
+			looks.add(read(new File("originalcharacter.png")));
+			looks.add(read(new File("girl.png")));
+			looks.add(read(new File("ghost1.png")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		idle.start();
+	}
+
+	public void resetPos() {
+		body.x = 250;
+		body.y = 250;
 	}
 
 	public void moveX(int dir) {
@@ -74,7 +78,6 @@ public class Player {
 	}
 
 	public void update() {
-		System.out.println(velocity.x + ", " + velocity.y);
 		body.x += velocity.getX();
 		body.y += velocity.getY();
 		velocity.setLocation(velocity.getX() * friction, velocity.getY() * friction);
@@ -88,8 +91,9 @@ public class Player {
 	}
 
 	public void draw(Graphics2D g) {
-		g.drawImage(look[0], new AffineTransformOp(new AffineTransform(transform),
+		g.drawImage(looks.get(frame), new AffineTransformOp(new AffineTransform(transform),
 				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), (int) body.x, (int) body.y);
+		drawHealth(g);
 		for (Projectile p : proj) {
 			p.draw(g);
 		}
@@ -101,6 +105,11 @@ public class Player {
 
 	public void fire(Point2D.Double p) {
 		proj.add(new Laser(p, body.x + playerSize / 2, body.y + playerSize / 2));
+	}
+
+	public void bounce() {
+		body.x -= 30;
+		body.y -= 30;
 	}
 
 	public boolean gotHit(Enemy e) {
@@ -134,5 +143,13 @@ public class Player {
 			if (p.distance <= 0)
 				proj.remove(p);
 		}
+	}
+
+	private void drawHealth(Graphics2D g) {
+		g.setColor(Color.red);
+		g.translate(body.x, body.y);
+		Rectangle2D.Double bar = new Rectangle2D.Double(20, -10, health, 5);
+		g.fill(bar);
+		g.translate(-body.x, -body.y);
 	}
 }
