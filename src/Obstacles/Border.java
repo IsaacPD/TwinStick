@@ -37,4 +37,13 @@ public class Border {
 		for (Line2D line : border)
 			g.draw(line);
 	}
+
+	@Override
+	public String toString() {
+		String result = super.toString() + "\n";
+
+		for (Line2D l : border)
+			result += "[l(" + l.getP1().toString() + " ), " + "(" + l.getP2().toString() + ")]\n";
+		return result;
+	}
 }

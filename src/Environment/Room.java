@@ -14,13 +14,12 @@ import java.util.ArrayList;
 import static Environment.Level.randomColor;
 import static Environment.Level.rooms;
 
-//TODO make enemies completely gone, as in they do not interact with the player when player is not in room
 //TODO extend JLabel for use of background images
 public class Room extends JPanel {
 	private Room north, south, east, west;
 	private ArrayList<Enemy> enemies = new ArrayList<>();
 	private Border border;
-	private Timer cool = new Timer(30, new AbstractAction() {
+	public Timer cool = new Timer(30, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			update();
@@ -42,10 +41,9 @@ public class Room extends JPanel {
 		rooms--;
 		initialize();
 		createBorder();
-		cool.start();
 	}
 
-	private void createBorder() {
+	public void createBorder() {
 		int offSet = 15;
 		int door = 100;
 
@@ -132,8 +130,12 @@ public class Room extends JPanel {
 
 		Line2D.Double roomB = border.crossesBorder();
 
-		if (roomB != null)
+		if (roomB != null) {
 			player.bounce(roomB);
+			/*System.out.println(border);
+			System.out.println("[l(" + roomB.getP1().toString() + " ), " + "(" + roomB.getP2().toString() + ")]\n"
+					+ "OUCH!: " + player.getBody().x + ", " + player.getBody().y);*/
+		}
 		player.slow();
 
 		repaint();

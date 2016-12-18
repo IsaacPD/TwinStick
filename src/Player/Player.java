@@ -3,6 +3,7 @@ package Player;
 import Effects.Laser;
 import Effects.Projectile;
 import Obstacles.Enemy;
+import Run.Game;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 import static javax.imageio.ImageIO.read;
 
+//TODO adjust player and projectile speed to something better
 public class Player {
 	public double health = 100;
 	private Timer invinsible = new Timer(1000, new AbstractAction() {
@@ -27,12 +29,11 @@ public class Player {
 			invinsible.stop();
 		}
 	});
-	private double friction = .85, maxSpeed = 15, speed = 4;
+	private double friction = .80, maxSpeed = 15, speed = 3;
 	private Point2D.Double velocity = new Point2D.Double(0, 0);
 	private ArrayList<Projectile> proj = new ArrayList<>();
 
 	private int playerSize = 90, frame = 0;
-	private float[] transform = {playerSize / 30, 0, 0, playerSize / 30, 0, 0};
 	private Rectangle2D.Double body;
 	private ArrayList<BufferedImage> looks = new ArrayList<>();
 	private Timer idle = new Timer(500, new AbstractAction() {
@@ -94,6 +95,8 @@ public class Player {
 	}
 
 	public void draw(Graphics2D g) {
+		float[] transform = {playerSize / 30, 0, 0, playerSize / 30, 0, 0};
+
 		g.drawImage(looks.get(frame), new AffineTransformOp(new AffineTransform(transform),
 				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), (int) body.x, (int) body.y);
 		g.draw(body);
@@ -162,5 +165,11 @@ public class Player {
 		Rectangle2D.Double bar = new Rectangle2D.Double(20, -10, health, 5);
 		g.fill(bar);
 		g.translate(-body.x, -body.y);
+	}
+
+	public void resize() {
+		playerSize = (int) (Game.height / 7.11111111111111);
+
+		body = new Rectangle2D.Double(body.x, body.y, playerSize, playerSize);
 	}
 }

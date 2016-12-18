@@ -6,7 +6,7 @@ import Player.Player;
 import javax.swing.*;
 import java.awt.*;
 
-//TODO randomly generate levels/maps with multiple rooms
+//TODO set minimum number of rooms to be created
 public class Level extends JPanel {
 	private static final Player p = new Player();
 	public static Room current;
@@ -16,6 +16,7 @@ public class Level extends JPanel {
 	public Level() {
 		initialize();
 		setPreferredSize(new Dimension(640, 480));
+		start.cool.start();
 	}
 
 	public static Player getP() {
@@ -32,7 +33,7 @@ public class Level extends JPanel {
 		start.setWest(new Room(start, Color.RED, 6));
 		start.setNorth(new Room(start, 2));
 		start.setSouth(new Room(start, Color.black, 8));*/
-		//start.getEnemies().add(new Snake());
+		start.getEnemies().add(new Snake());
 		current = start;
 	}
 }

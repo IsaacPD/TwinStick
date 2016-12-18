@@ -13,12 +13,11 @@ import java.util.Set;
 import static Environment.Level.current;
 
 //TODO make game scale with screen size and adjust projectile speeds
-//TODO loadLevel() when entering room
 public class Game extends JFrame implements ActionListener {
 	public static int width = 640, height = 480;
 	private final Player p;
 	private final Timer npc = new Timer(30, this);
-	private final Timer airTimer = new Timer(30, this);
+	private final Timer airTimer = new Timer(15, this);
 	private Level levels = new Level();
 	private int airTime = 0;
 
@@ -34,6 +33,17 @@ public class Game extends JFrame implements ActionListener {
 		setTitle("Work in progress");
 
 		add(current);
+		addWindowStateListener(new WindowAdapter() {
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				super.windowStateChanged(e);
+				width = getWidth();
+				height = getHeight();
+				current.createBorder();
+				p.resize();
+				repaint();
+			}
+		});
 
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -54,11 +64,15 @@ public class Game extends JFrame implements ActionListener {
 
 	public void loadLevel(int index) {
 		remove(current);
+		current.cool.stop();
+
 		current = (index == -1) ? current.getWest() :
 				(index == 1) ? current.getEast() :
 						(index == 2) ? current.getSouth()
 								: current.getNorth();
+
 		add(current);
+		current.cool.start();
 		p.clear();
 		pack();
 		setVisible(true);
