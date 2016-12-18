@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import static Environment.Level.randomColor;
@@ -16,10 +17,10 @@ import static Environment.Level.rooms;
 
 //TODO extend JLabel for use of background images
 public class Room extends JPanel {
-	private Room north, south, east, west;
-	private ArrayList<Enemy> enemies = new ArrayList<>();
+	private final ArrayList<Enemy> enemies = new ArrayList<>();
+	private Room north, south, east, west, parent;
 	private Border border;
-	public Timer cool = new Timer(30, new AbstractAction() {
+	public final Timer cool = new Timer(30, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			update();
@@ -37,7 +38,7 @@ public class Room extends JPanel {
 	public Room(Room parent, Color c, int pos) {
 		setBackground(c);
 		orient(parent, pos);
-		setPreferredSize(new Dimension(640, 480));
+		setPreferredSize(new Dimension(Game.width, Game.height));
 		rooms--;
 		initialize();
 		createBorder();
@@ -45,7 +46,7 @@ public class Room extends JPanel {
 
 	public void createBorder() {
 		int offSet = 15;
-		int door = 100;
+		int door = Level.getP().playerHeight;
 
 		ArrayList<Line2D.Double> lines = new ArrayList<>();
 		if (west != null) {
@@ -72,6 +73,8 @@ public class Room extends JPanel {
 	}
 
 	private void orient(Room parent, int pos) {
+		this.parent = parent;
+
 		if (parent == null)
 			return;
 		if (pos == 2)
@@ -98,7 +101,7 @@ public class Room extends JPanel {
 
 	}
 
-	public void initialize() {
+	private void initialize() {
 		if (north == null)
 			north = ((int) (Math.random() * 2) == 1 && rooms > 0) ? new Room(this, randomColor(), 2) : null;
 		if (east == null)
@@ -109,32 +112,41 @@ public class Room extends JPanel {
 			west = ((int) (Math.random() * 2) == 1 && rooms > 0) ? new Room(this, randomColor(), 6) : null;
 	}
 
+	void createRoom() {
+		setPreferredSize(new Dimension(Game.width, Game.height));
+		createBorder();
+		if (north != null && north != parent)
+			north.createRoom();
+		if (west != null && west != parent)
+			west.createRoom();
+		if (east != null && east != parent)
+			east.createRoom();
+		if (south != null && south != parent)
+			south.createRoom();
+
+		for (Enemy e : enemies)
+			e.resize();
+	}
+
 	private void update() {
 		Player player = Level.getP();
 
-		player.update();
+		Point2D.Double origin = player.update();
 
 		for (int i = enemies.size() - 1; i >= 0; i--) {
 			Enemy e = enemies.get(i);
 
-			Line2D.Double border = e.crosses();
-
-			if (border != null) {
+			if (e.crosses() != null) {
 				player.gotHit(e);
-				player.bounce(border);
+				player.bounce(origin, e.crosses());
 			}
 			if (e.gotHit())
 				if (e.getHealth() <= 0)
 					enemies.remove(e);
 		}
 
-		Line2D.Double roomB = border.crossesBorder();
-
-		if (roomB != null) {
-			player.bounce(roomB);
-			/*System.out.println(border);
-			System.out.println("[l(" + roomB.getP1().toString() + " ), " + "(" + roomB.getP2().toString() + ")]\n"
-					+ "OUCH!: " + player.getBody().x + ", " + player.getBody().y);*/
+		if (border.crossesBorder(player.getBody()) != null) {
+			player.bounce(origin, border.crossesBorder(player.getBody()));
 		}
 		player.slow();
 
@@ -145,32 +157,20 @@ public class Room extends JPanel {
 		return north;
 	}
 
-	void setNorth(Room north) {
-		this.north = north;
-	}
-
 	public Room getSouth() {
 		return south;
-	}
-
-	void setSouth(Room south) {
-		this.south = south;
 	}
 
 	public Room getEast() {
 		return east;
 	}
 
-	void setEast(Room east) {
-		this.east = east;
-	}
-
 	public Room getWest() {
 		return west;
 	}
 
-	void setWest(Room west) {
-		this.west = west;
+	public Room getParentRoom() {
+		return parent;
 	}
 
 	ArrayList<Enemy> getEnemies() {

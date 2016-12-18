@@ -1,11 +1,14 @@
 package Effects;
 
+import Run.Game;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 public abstract class Projectile extends Rectangle2D.Double {
-	public int distance = 300;
+	public int distance = (int) (Game.width / 3.41333333333333);
+	double ratioWidth, ratioHeight;
 	int speed;
 	private Color color = Color.orange;
 	private Point2D.Double dir, start;
@@ -42,6 +45,11 @@ public abstract class Projectile extends Rectangle2D.Double {
 		else g.rotate(-angle);
 
 		g.translate(-start.x, -start.y);
+	}
+
+	public void resize() {
+		this.width = Game.width / ratioWidth;
+		this.height = Game.height / ratioHeight;
 	}
 
 	public Point2D.Double getDir() {

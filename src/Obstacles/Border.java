@@ -1,15 +1,14 @@
 package Obstacles;
 
-import Environment.Level;
-
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Border {
-	private ArrayList<Line2D.Double> border = new ArrayList<>();
+	private final ArrayList<Line2D.Double> border = new ArrayList<>();
 
 	public Border(RectangularShape r) {
 		double x = r.getX(), y = r.getY(), xMax = r.getMaxX(), yMax = r.getMaxY();
@@ -25,9 +24,9 @@ public class Border {
 		}
 	}
 
-	public Line2D.Double crossesBorder() {
+	public Line2D.Double crossesBorder(Rectangle2D.Double r) {
 		for (Line2D.Double l : border)
-			if (Level.getP().getBody().intersectsLine(l))
+			if (r.intersectsLine(l))
 				return l;
 		return null;
 	}

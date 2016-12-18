@@ -12,9 +12,14 @@ import java.util.Set;
 
 import static Environment.Level.current;
 
-//TODO make game scale with screen size and adjust projectile speeds
+//TODO make game scale with screen size and adjust projectile speeds and create pause screen/menu
+//TODO make it possible to save game, add game over condition, add start screen
+//TODO fix input so that there is no delay when pressing two or more keys
 public class Game extends JFrame implements ActionListener {
-	public static int width = 640, height = 480;
+	public static final int basisWidth = 1280;
+	public static final int basisHeight = 720;
+	public static int width = 1024;
+	public static int height = 576;
 	private final Player p;
 	private final Timer npc = new Timer(30, this);
 	private final Timer airTimer = new Timer(15, this);
@@ -28,6 +33,7 @@ public class Game extends JFrame implements ActionListener {
 		airTimer.setActionCommand("Air");
 
 		current = levels.start;
+		current.createBorder();
 		p = Level.getP();
 
 		setTitle("Work in progress");
@@ -51,7 +57,7 @@ public class Game extends JFrame implements ActionListener {
 		addMouseListener(new MouseAdapter());
 		pack();
 
-		setResizable(true);
+		setResizable(false);
 		setVisible(true);
 
 		npc.start();
@@ -83,22 +89,18 @@ public class Game extends JFrame implements ActionListener {
 		if (airTime > 0 && e.getActionCommand().equals("Air"))
 			airTime = (airTime + 1) % 18;
 
-		Dimension d = this.getSize();
-		width = d.width;
-		height = d.height;
-
-		if (p.getBody().x < -15) {
+		if (p.getBody().getCenterX() < -15) {
 			loadLevel(-1);
-			p.resetPos();
-		} else if (p.getBody().x > Game.width + 15) {
+			p.resetPos(6);
+		} else if (p.getBody().getCenterX() > Game.width) {
 			loadLevel(1);
-			p.resetPos();
-		} else if (p.getBody().y < -15) {
+			p.resetPos(4);
+		} else if (p.getBody().getCenterY() < -15) {
 			loadLevel(-2);
-			p.resetPos();
-		} else if (p.getBody().y > Game.height + 15) {
+			p.resetPos(2);
+		} else if (p.getBody().getCenterY() > Game.height) {
 			loadLevel(2);
-			p.resetPos();
+			p.resetPos(8);
 		}
 
 		repaint();
@@ -149,17 +151,29 @@ public class Game extends JFrame implements ActionListener {
 						if (gTime.isRunning()) gTime.stop();
 						else gTime.start();*/
 
-					else if (key == KeyEvent.VK_8)
-						loadLevel(-2);
+					else if (key == KeyEvent.VK_8 || key == KeyEvent.VK_NUMPAD8) {
+						Game.height *= 2;
+						Game.width *= 2;
+						setSize(width, height);
+						p.resize();
+						levels.createRoom();
+						repaint();
+					}
 
 					else if (key == KeyEvent.VK_4)
-						loadLevel(-1);
+						System.out.println(p.getBody().width + ", " + p.getBody().height + "\n" + p.playerWidth + ", " + p.playerHeight);
 
 					else if (key == KeyEvent.VK_2)
 						loadLevel(2);
 
-					else if (key == KeyEvent.VK_6)
-						loadLevel(1);
+					else if (key == KeyEvent.VK_6 || key == KeyEvent.VK_NUMPAD6) {
+						Game.height /= 2;
+						Game.width /= 2;
+						setSize(width, height);
+						p.resize();
+						levels.createRoom();
+						repaint();
+					}
 				}
 			}
 		}

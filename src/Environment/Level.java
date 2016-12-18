@@ -27,6 +27,10 @@ public class Level extends JPanel {
 		return new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
 	}
 
+	public void createRoom() {
+		start.createRoom();
+	}
+
 	private void initialize() {
 		start = new Room(Color.pink);
 		/*start.setEast(new Room(start, Color.magenta, 4));
