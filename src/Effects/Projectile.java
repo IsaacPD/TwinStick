@@ -1,5 +1,6 @@
 package Effects;
 
+import Audio.Effects;
 import Run.Game;
 
 import java.awt.*;
@@ -75,6 +76,8 @@ public abstract class Projectile extends Rectangle2D.Double {
 			this.height = Game.height / ratioHeight;
 
 			speed = distance / SPEED;
+			Effects effects = new Effects();
+			effects.playLaser();
 		}
 
 		public Laser(Point2D.Double p, double x, double y) {
@@ -87,6 +90,8 @@ public abstract class Projectile extends Rectangle2D.Double {
 			this.height = Game.height / ratioHeight;
 
 			speed = distance / SPEED;
+			Effects effects = new Effects();
+			effects.playLaser();
 		}
 	}
 

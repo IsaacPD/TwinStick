@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public abstract class Asset {
-	private final String path = "C:\\Users\\isaac\\Desktop\\Dev Stuff\\TwinStick\\";
+	private final String path = "C:\\Users\\isaac\\Desktop\\Dev Stuff\\TwinStick\\sprites\\";
 	public ArrayList<BufferedImage> looks = new ArrayList<>();
 	public Timer idle = new Timer(500, new AbstractAction() {
 		@Override
@@ -36,7 +36,7 @@ public abstract class Asset {
 		try {
 			for (File f : new File(path).listFiles()) {
 				if (f.getName().contains(name))
-					looks.add(ImageIO.read(new File(f.getName())));
+					looks.add(ImageIO.read(new File(path + f.getName())));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

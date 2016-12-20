@@ -1,5 +1,6 @@
 package Environment;
 
+import Audio.Effects;
 import Obstacles.Border;
 import Obstacles.Deb;
 import Obstacles.Enemy;
@@ -175,23 +176,29 @@ public class Room extends JPanel {
 
 		for (Enemy e : enemies)
 			e.resize();
+
+		createBorder();
 	}
 
 	private void update() {
 		Player player = Level.getP();
 
 		Point2D.Double origin = player.update();
+		Effects effects = new Effects();
 
 		for (int i = enemies.size() - 1; i >= 0; i--) {
 			Enemy e = enemies.get(i);
 
 			if (e.hitPlayer() != -1) {
 				player.gotHit(e);
-				//player.bounce(origin, e.crosses());
+				if (player.health <= 0)
+					effects.playDeath();
 			}
 			if (e.gotHit())
-				if (e.getHealth() <= 0)
+				if (e.getHealth() <= 0) {
 					enemies.remove(e);
+					effects.playDeath();
+				}
 		}
 
 		for (int i = items.size() - 1; i >= 0; i--) {

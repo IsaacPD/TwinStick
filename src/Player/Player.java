@@ -17,8 +17,7 @@ import java.util.ArrayList;
 
 import static javax.imageio.ImageIO.read;
 
-//TODO adjust player speed and physics to something better
-//TODO make speed relative to screen size
+//TODO adjust player speed to something better
 public class Player extends Asset {
 	private final Timer invincible = new Timer(1000, new AbstractAction() {
 		@Override
@@ -26,18 +25,21 @@ public class Player extends Asset {
 			invincible.stop();
 		}
 	});
-	private final double maxSpeed = 15, speed = 3;
 	private final Point2D.Double velocity = new Point2D.Double(0, 0);
 	private final ArrayList<Projectile> proj = new ArrayList<>();
 	public double health = 100;
+	private double maxSpeed = 10, speed = 2;
 
 	public Player() {
 		super("originalcharacter", 2);
 
+		speed = Game.width / 512;
+		maxSpeed = Game.width / 102.4;
+
 		try {
 			//look.add(read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
-			looks.add(read(new File("girl.png")));
-			looks.add(read(new File("ghost1.png")));
+			looks.add(read(new File("sprites\\girl.png")));
+			looks.add(read(new File("sprites\\ghost1.png")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,17 +65,19 @@ public class Player extends Asset {
 	public void moveX(int dir) {
 		if (Math.abs(velocity.getX()) < maxSpeed)
 			velocity.x += dir * speed;
-		else if (velocity.getX() > maxSpeed)
+		else if (velocity.getX() >= maxSpeed)
 			velocity.x = maxSpeed;
-		else velocity.x = -maxSpeed;
+		else if (velocity.getX() <= -maxSpeed)
+			velocity.x = -maxSpeed;
 	}
 
 	public void moveY(int dir) {
 		if (Math.abs(velocity.getY()) < maxSpeed)
 			velocity.y += dir * speed;
-		else if (velocity.getY() > maxSpeed)
+		else if (velocity.getY() >= maxSpeed)
 			velocity.y = maxSpeed;
-		else velocity.y = -maxSpeed;
+		else if (velocity.getY() <= -maxSpeed)
+			velocity.y = -maxSpeed;
 	}
 
 	public Point2D.Double update() {
@@ -173,8 +177,12 @@ public class Player extends Asset {
 
 		body.width = imageWidth * (width / imageWidth);
 		body.height = imageHeight * (height / imageHeight);
+
 		for (Projectile p : proj)
 			p.resize();
+
+		speed = Game.width / 512;
+		maxSpeed = Game.width / 102.4;
 	}
 
 	public int getX() {

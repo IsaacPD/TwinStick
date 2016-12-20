@@ -12,11 +12,11 @@ import java.util.Set;
 
 import static Environment.Level.current;
 
-//TODO create pause screen/menu
+//TODO create pause menu
 //TODO make it possible to save game, add game over condition, add start screen
-//TODO fix input so that there is no delay when pressing two or more keys
 //TODO make more items and npcs
 //TODO make a map
+//TODO make resizing screen reset player, item, and enemy positions
 public class Game extends JFrame implements ActionListener {
 	public static final int basisWidth = 1280, basisHeight = 720;
 	public final static Random gen = new Random();
@@ -24,6 +24,7 @@ public class Game extends JFrame implements ActionListener {
 	private final Player p;
 	private final Timer npc = new Timer(30, this);
 	private final Timer airTimer = new Timer(15, this);
+	private Set<Integer> keys = new HashSet<>();
 	private Level levels = new Level();
 	private int airTime = 0;
 
@@ -92,78 +93,76 @@ public class Game extends JFrame implements ActionListener {
 			p.resetPos(8);
 		}
 
-		repaint();
+		inputHandle();
 	}
 
-	public class PlayerAdapter implements KeyListener {
+	private void inputHandle() {
 
-		private final Set<Integer> pressed = new HashSet<>();
+		if (keys.contains(KeyEvent.VK_W))
+			p.moveY(-1);
 
-		@Override
-		public void keyTyped(KeyEvent e) {
+		if (keys.contains(KeyEvent.VK_A))
+			p.moveX(-1);
 
+		if (keys.contains(KeyEvent.VK_D))
+			p.moveX(1);
+
+		if (keys.contains(KeyEvent.VK_S))
+			p.moveY(1);
+
+		if (keys.contains(KeyEvent.VK_UP) && airTime == 0) {
+			p.fire(0, -1);
+			airTime++;
 		}
+		if (keys.contains(KeyEvent.VK_LEFT) && airTime == 0) {
+			p.fire(-1, 0);
+			airTime++;
+		}
+		if (keys.contains(KeyEvent.VK_RIGHT) && airTime == 0) {
+			p.fire(1, 0);
+			airTime++;
+		}
+		if (keys.contains(KeyEvent.VK_DOWN) && airTime == 0) {
+			p.fire(0, 1);
+			airTime++;
+		}
+	}
+
+	public class PlayerAdapter extends KeyAdapter {
 
 		@Override
-		public synchronized void keyPressed(KeyEvent k) {
-			pressed.add(k.getKeyCode());
-			if (pressed.size() >= 1) {
-				for (int key : pressed) {
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_SPACE)
+				current.pause();
 
-					if (key == KeyEvent.VK_W)
-						p.moveY(-1);
-
-					else if (key == KeyEvent.VK_A)
-						p.moveX(-1);
-
-					else if (key == KeyEvent.VK_D)
-						p.moveX(1);
-
-					else if (key == KeyEvent.VK_S)
-						p.moveY(1);
-
-					else if (key == KeyEvent.VK_UP && airTime == 0) {
-						p.fire(0, -1);
-						airTime++;
-					} else if (key == KeyEvent.VK_LEFT && airTime == 0) {
-						p.fire(-1, 0);
-						airTime++;
-					} else if (key == KeyEvent.VK_RIGHT && airTime == 0) {
-						p.fire(1, 0);
-						airTime++;
-					} else if (key == KeyEvent.VK_DOWN && airTime == 0) {
-						p.fire(0, 1);
-						airTime++;
-					} else if (key == KeyEvent.VK_SPACE)
-						current.pause();
-
-					else if (key == KeyEvent.VK_8 || key == KeyEvent.VK_NUMPAD8) {
-						Game.height *= 2;
-						Game.width *= 2;
-						setSize(width, height);
-						p.resize();
-						levels.createRoom();
-						repaint();
-					} else if (key == KeyEvent.VK_4) ;
-
-					else if (key == KeyEvent.VK_2)
-						loadLevel(2);
-
-					else if (key == KeyEvent.VK_6 || key == KeyEvent.VK_NUMPAD6) {
-						Game.height /= 2;
-						Game.width /= 2;
-						setSize(width, height);
-						p.resize();
-						levels.createRoom();
-						repaint();
-					}
-				}
+			if (e.getKeyCode() == KeyEvent.VK_8 || e.getKeyCode() == KeyEvent.VK_NUMPAD8) {
+				Game.height *= 2;
+				Game.width *= 2;
+				setSize(width, height);
+				p.resize();
+				levels.createRoom();
+				repaint();
 			}
+
+			if (e.getKeyCode() == KeyEvent.VK_2)
+				loadLevel(2);
+
+			if (e.getKeyCode() == KeyEvent.VK_6 || e.getKeyCode() == KeyEvent.VK_NUMPAD6) {
+				Game.height /= 2;
+				Game.width /= 2;
+				setSize(width, height);
+				p.resize();
+				levels.createRoom();
+				repaint();
+			}
+			keys.add(e.getKeyCode());
+			e.consume();
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			pressed.remove(e.getKeyCode());
+			keys.remove(e.getKeyCode());
+			e.consume();
 		}
 	}
 

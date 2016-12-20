@@ -18,7 +18,7 @@ public class Deb extends Enemy {
 		super("devil", 2);
 
 		health = 50;
-		damage = 5;
+		damage = 10;
 
 		script = new Timer(20, new AbstractAction() {
 			@Override
@@ -35,6 +35,7 @@ public class Deb extends Enemy {
 				if (health <= 25) {
 					body.x += (Level.getP().getX() > body.x) ? 1 : -1;
 					body.y += (Level.getP().getY() > body.y) ? 1 : -1;
+					hitBox = new Border(body);
 				}
 
 				interval = (interval + 1) % 50;
@@ -43,7 +44,7 @@ public class Deb extends Enemy {
 
 		hitBox = new Border(body);
 
-		idle.setDelay(250);
+		idle.setDelay(167);
 
 		idle.start();
 	}
