@@ -1,19 +1,16 @@
 package Player;
 
-import Effects.Laser;
 import Effects.Projectile;
 import Obstacles.Enemy;
+import Run.Asset;
 import Run.Game;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,49 +19,32 @@ import static javax.imageio.ImageIO.read;
 
 //TODO adjust player speed and physics to something better
 //TODO make speed relative to screen size
-public class Player {
+public class Player extends Asset {
 	private final Timer invincible = new Timer(1000, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			invincible.stop();
 		}
 	});
-	private final double maxSpeed = 15, speed = 3, ratioWidth, ratioHeight;
+	private final double maxSpeed = 15, speed = 3;
 	private final Point2D.Double velocity = new Point2D.Double(0, 0);
 	private final ArrayList<Projectile> proj = new ArrayList<>();
-	private final int playerSize = 2, imageWidth, imageHeight;
-	private final Rectangle2D.Double body;
-	private final ArrayList<BufferedImage> looks = new ArrayList<>();
 	public double health = 100;
-	public int playerWidth, playerHeight;
-	private int frame = 0;
-	private final Timer idle = new Timer(500, new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			frame = (frame + 1) % looks.size();
-		}
-	});
 
 	public Player() {
+		super("originalcharacter", 2);
+
 		try {
 			//look.add(read(new URL("https://upload.wikimedia.org/wikipedia/en/9/99/MarioSMBW.png"));
-			looks.add(read(new File("originalcharacter.png")));
 			looks.add(read(new File("girl.png")));
 			looks.add(read(new File("ghost1.png")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		imageHeight = looks.get(0).getHeight();
-		imageWidth = looks.get(0).getWidth();
 
-		ratioWidth = Game.basisWidth / (imageWidth * 3);
-		ratioHeight = Game.basisHeight / (imageHeight * 3);
+		body = new Rectangle2D.Double(100, 100, imageWidth * (width / imageWidth), imageHeight * (height / imageHeight));
 
-		playerWidth = playerSize * (int) (Game.width / ratioWidth);
-		playerHeight = playerSize * (int) (Game.height / ratioHeight);
-
-
-		body = new Rectangle2D.Double(100, 100, imageWidth * (playerWidth / imageWidth), imageHeight * (playerHeight / imageHeight));
+		idle.setDelay(125);
 		idle.start();
 	}
 
@@ -117,11 +97,8 @@ public class Player {
 	}
 
 	public void draw(Graphics2D g) {
-		float[] transform = {playerWidth / imageWidth, 0, 0, playerHeight / imageHeight};
+		super.draw(g);
 
-		g.drawImage(looks.get(frame), new AffineTransformOp(new AffineTransform(transform),
-				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), (int) body.x, (int) body.y);
-		g.draw(body);
 		drawHealth(g);
 		for (Projectile p : proj) {
 			p.draw(g);
@@ -129,15 +106,14 @@ public class Player {
 	}
 
 	public void fire(int x, int y) {
-		proj.add(new Laser(x, y, body.getCenterX(), body.getCenterY()));
+		proj.add(new Projectile.Laser(x, y, body.getCenterX(), body.getCenterY()));
 	}
 
 	public void fire(Point2D.Double p) {
-		proj.add(new Laser(p, body.getCenterX(), body.getCenterY()));
+		proj.add(new Projectile.Laser(p, body.getCenterX(), body.getCenterY()));
 	}
 
 	public void bounce(Point2D.Double point, Line2D.Double l) {
-		System.out.println(velocity.x + ", " + velocity.y);
 		double angle = Math.PI / 2 - Math.atan((l.getY2() - l.getY1()) / (l.getX2() - l.getX1()));
 
 		velocity.y *= -Math.sin(angle);
@@ -147,8 +123,8 @@ public class Player {
 	}
 
 	public boolean gotHit(Enemy e) {
-		if (e.hitPlayer() && !invincible.isRunning()) {
-			health -= 10;
+		if (!invincible.isRunning()) {
+			health -= e.hitPlayer();
 			System.out.println("Player: " + health);
 			invincible.start();
 			return true;
@@ -184,18 +160,28 @@ public class Player {
 	private void drawHealth(Graphics2D g) {
 		g.setColor(Color.red);
 		g.translate(body.x, body.y);
-		Rectangle2D.Double bar = new Rectangle2D.Double(0, 0, health / (100 / playerWidth), 5);
+		Rectangle2D.Double bar = new Rectangle2D.Double(0, -10, health, 5);
 		g.fill(bar);
+		g.setColor(Color.black);
+		g.draw(bar);
 		g.translate(-body.x, -body.y);
 	}
 
 	public void resize() {
-		playerWidth = playerSize * (int) (Game.width / ratioWidth);
-		playerHeight = playerSize * (int) (Game.height / ratioHeight);
+		width = size * (int) (Game.width / ratioWidth);
+		height = size * (int) (Game.height / ratioHeight);
 
-		body.width = imageWidth * (playerWidth / imageWidth);
-		body.height = imageHeight * (playerHeight / imageHeight);
+		body.width = imageWidth * (width / imageWidth);
+		body.height = imageHeight * (height / imageHeight);
 		for (Projectile p : proj)
 			p.resize();
+	}
+
+	public int getX() {
+		return (int) body.getCenterX();
+	}
+
+	public int getY() {
+		return (int) body.getCenterY();
 	}
 }

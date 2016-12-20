@@ -4,22 +4,23 @@ import Environment.Level;
 import Player.Player;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import static Environment.Level.current;
 
-//TODO make game scale with screen size and adjust projectile speeds and create pause screen/menu
+//TODO create pause screen/menu
 //TODO make it possible to save game, add game over condition, add start screen
 //TODO fix input so that there is no delay when pressing two or more keys
+//TODO make more items and npcs
+//TODO make a map
 public class Game extends JFrame implements ActionListener {
-	public static final int basisWidth = 1280;
-	public static final int basisHeight = 720;
-	public static int width = 1024;
-	public static int height = 576;
+	public static final int basisWidth = 1280, basisHeight = 720;
+	public final static Random gen = new Random();
+	public static int width = 1024, height = 576;
 	private final Player p;
 	private final Timer npc = new Timer(30, this);
 	private final Timer airTimer = new Timer(15, this);
@@ -39,18 +40,6 @@ public class Game extends JFrame implements ActionListener {
 		setTitle("Work in progress");
 
 		add(current);
-		addWindowStateListener(new WindowAdapter() {
-			@Override
-			public void windowStateChanged(WindowEvent e) {
-				super.windowStateChanged(e);
-				width = getWidth();
-				height = getHeight();
-				current.createBorder();
-				p.resize();
-				repaint();
-			}
-		});
-
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		addKeyListener(new PlayerAdapter());
@@ -70,7 +59,7 @@ public class Game extends JFrame implements ActionListener {
 
 	public void loadLevel(int index) {
 		remove(current);
-		current.cool.stop();
+		current.pause();
 
 		current = (index == -1) ? current.getWest() :
 				(index == 1) ? current.getEast() :
@@ -78,7 +67,7 @@ public class Game extends JFrame implements ActionListener {
 								: current.getNorth();
 
 		add(current);
-		current.cool.start();
+		current.pause();
 		p.clear();
 		pack();
 		setVisible(true);
@@ -145,11 +134,8 @@ public class Game extends JFrame implements ActionListener {
 					} else if (key == KeyEvent.VK_DOWN && airTime == 0) {
 						p.fire(0, 1);
 						airTime++;
-					}
-
-					/*else if (key == KeyEvent.VK_SPACE)
-						if (gTime.isRunning()) gTime.stop();
-						else gTime.start();*/
+					} else if (key == KeyEvent.VK_SPACE)
+						current.pause();
 
 					else if (key == KeyEvent.VK_8 || key == KeyEvent.VK_NUMPAD8) {
 						Game.height *= 2;
@@ -158,10 +144,7 @@ public class Game extends JFrame implements ActionListener {
 						p.resize();
 						levels.createRoom();
 						repaint();
-					}
-
-					else if (key == KeyEvent.VK_4)
-						System.out.println(p.getBody().width + ", " + p.getBody().height + "\n" + p.playerWidth + ", " + p.playerHeight);
+					} else if (key == KeyEvent.VK_4) ;
 
 					else if (key == KeyEvent.VK_2)
 						loadLevel(2);
