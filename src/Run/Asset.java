@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public abstract class Asset {
-	private final String path = "C:\\Users\\isaac\\Desktop\\Dev Stuff\\TwinStick\\sprites\\";
+	private final String path = "sprites\\";
 	public ArrayList<BufferedImage> looks = new ArrayList<>();
 	public Timer idle = new Timer(500, new AbstractAction() {
 		@Override
@@ -59,5 +59,13 @@ public abstract class Asset {
 		float[] transform = {width / imageWidth, 0, 0, height / imageHeight};
 		g.drawImage(looks.get(frame), new AffineTransformOp(new AffineTransform(transform),
 				AffineTransformOp.TYPE_NEAREST_NEIGHBOR), (int) body.x, (int) body.y);
+	}
+
+	public void resize() {
+		width = size * (int) (Game.width / ratioWidth);
+		height = size * (int) (Game.height / ratioHeight);
+
+		body.width = imageWidth * (width / imageWidth);
+		body.height = imageHeight * (height / imageHeight);
 	}
 }

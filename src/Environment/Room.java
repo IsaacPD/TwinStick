@@ -24,15 +24,18 @@ import static Environment.Level.rooms;
 public class Room extends JPanel {
 	private final ArrayList<Enemy> enemies = new ArrayList<>();
 	private final ArrayList<Items> items = new ArrayList<>();
+	private boolean isPaused = true;
 
 	private Room north, south, east, west, parent, reservedE, reservedW, reservedN, reservedS;
 	private Border border;
 	public final Timer cool = new Timer(30, new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			update();
-			if (Level.getP().health <= 0)
-				cool.stop();
+			if (!isPaused) {
+				update();
+				if (Level.getP().health <= 0)
+					cool.stop();
+			} else repaint();
 		}
 	});
 
@@ -132,12 +135,17 @@ public class Room extends JPanel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (Level.getP().health <= 0) {
-			g.drawString("GAME OVER", Game.width / 2 - "GAME OVER".length() / 2, Game.height / 2);
-			return;
-		}
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
+
+		if (Level.getP().health <= 0) {
+			g2.drawString("GAME OVER", Game.width / 2 - "GAME OVER".length() / 2, Game.height / 2);
+			return;
+		}
+		if (isPaused) {
+			g2.drawString("PAUSED", Game.width / 2 - "PAUSED".length() / 2, Game.height / 2);
+			return;
+		}
 
 		border.draw(g2);
 
@@ -176,6 +184,9 @@ public class Room extends JPanel {
 
 		for (Enemy e : enemies)
 			e.resize();
+
+		for (Items item : items)
+			item.resize();
 
 		createBorder();
 	}
@@ -243,11 +254,17 @@ public class Room extends JPanel {
 	}
 
 	public void pause() {
-		if (cool.isRunning()) cool.stop();
-		else cool.start();
+		if (!cool.isRunning()) cool.start();
+
+		isPaused = !isPaused;
 		for (Enemy e : enemies) {
 			if (e.script.isRunning()) e.script.stop();
 			else e.script.start();
 		}
+		repaint();
+	}
+
+	public boolean isPaused() {
+		return isPaused;
 	}
 }

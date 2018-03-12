@@ -2,7 +2,6 @@ package Obstacles;
 
 import Environment.Level;
 import Run.Asset;
-import Run.Game;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,14 +57,6 @@ public abstract class Enemy extends Asset {
 		g.setColor(Color.black);
 		g.draw(bar);
 		g.translate(-body.x, -body.y);
-	}
-
-	public void resize() {
-		width = size * (int) (Game.width / ratioWidth);
-		height = size * (int) (Game.height / ratioHeight);
-
-		body.width = imageWidth * (width / imageWidth);
-		body.height = imageHeight * (height / imageHeight);
 	}
 
 	@Override

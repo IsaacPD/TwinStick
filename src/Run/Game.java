@@ -16,15 +16,14 @@ import static Environment.Level.current;
 //TODO make it possible to save game, add game over condition, add start screen
 //TODO make more items and npcs
 //TODO make a map
-//TODO make resizing screen reset player, item, and enemy positions
 public class Game extends JFrame implements ActionListener {
 	public static final int basisWidth = 1280, basisHeight = 720;
 	public final static Random gen = new Random();
 	public static int width = 1024, height = 576;
 	private final Player p;
+	private Set<Integer> keys = new HashSet<>();
 	private final Timer npc = new Timer(30, this);
 	private final Timer airTimer = new Timer(15, this);
-	private Set<Integer> keys = new HashSet<>();
 	private Level levels = new Level();
 	private int airTime = 0;
 
@@ -44,7 +43,7 @@ public class Game extends JFrame implements ActionListener {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		addKeyListener(new PlayerAdapter());
-		addMouseListener(new MouseAdapter());
+		addMouseListener(new MAdapter());
 		pack();
 
 		setResizable(false);
@@ -61,6 +60,7 @@ public class Game extends JFrame implements ActionListener {
 	public void loadLevel(int index) {
 		remove(current);
 		current.pause();
+		current.cool.stop();
 
 		current = (index == -1) ? current.getWest() :
 				(index == 1) ? current.getEast() :
@@ -93,7 +93,8 @@ public class Game extends JFrame implements ActionListener {
 			p.resetPos(8);
 		}
 
-		inputHandle();
+		if (!current.isPaused() && current.cool.isRunning())
+			inputHandle();
 	}
 
 	private void inputHandle() {
@@ -155,47 +156,35 @@ public class Game extends JFrame implements ActionListener {
 				levels.createRoom();
 				repaint();
 			}
-			keys.add(e.getKeyCode());
-			e.consume();
+			if (!current.isPaused() && current.cool.isRunning()) {
+				keys.add(e.getKeyCode());
+				e.consume();
+			}
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			keys.remove(e.getKeyCode());
-			e.consume();
+			if (!current.isPaused() && current.cool.isRunning()) {
+				keys.remove(e.getKeyCode());
+				e.consume();
+			}
 		}
 	}
 
-	public class MouseAdapter implements MouseListener {
-		@Override
-		public void mouseClicked(MouseEvent e) {
-
-		}
+	public class MAdapter extends MouseAdapter {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			double x = e.getX() - p.getBody().getCenterX(), y = e.getY() - p.getBody().getCenterY();
-			double constant = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-			x = 1 / constant * x;
-			y = 1 / constant * y;
+			if (!current.isPaused() && current.cool.isRunning()) {
+				double x = e.getX() - p.getBody().getCenterX(), y = e.getY() - p.getBody().getCenterY();
+				double constant = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+				x = 1 / constant * x;
+				y = 1 / constant * y;
 
-			Point2D.Double unitPoint = new Point2D.Double(x, y);
-			p.fire(unitPoint);
+				Point2D.Double unitPoint = new Point2D.Double(x, y);
+				p.fire(unitPoint);
+			}
 		}
 
-		@Override
-		public void mouseReleased(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-
-		}
 	}
 }

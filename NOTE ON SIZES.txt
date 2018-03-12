@@ -1,0 +1,66 @@
+THE RATIOS ARE BASED ON THE RESOLUTION 1280 X 720
+AND ARE CALCULATED BY DOING
+HEIGHTRATIO = 720 / 3 TIMES IMAGE HEIGHT
+WIDTHRATIO = 1280 / 3 TIMES IMAGE WIDTH
+
+DIVIDING THE IMAGES BASED ON THESE RATIOS WILL MAINTAIN THE RATIO THAT THEY ARE DRAWN IN
+
+PROJECTILE RATIO IS BASED ON 1024 X 576
+
+OLD KEYEVENT HANDLER
+/*@Override
+		public synchronized void keyPressed(KeyEvent k) {
+			pressed.add(k.getKeyCode());
+			if (pressed.contains(KeyEvent.VK_W))
+				p.moveY(-1);
+
+			if (pressed.contains(KeyEvent.VK_A))
+				p.moveX(-1);
+
+			if (pressed.contains(KeyEvent.VK_D))
+				p.moveX(1);
+
+			if (pressed.contains(KeyEvent.VK_S))
+				p.moveY(1);
+
+			if (pressed.contains(KeyEvent.VK_UP) && airTime == 0) {
+				p.fire(0, -1);
+				airTime++;
+			} if (pressed.contains(KeyEvent.VK_LEFT) && airTime == 0) {
+				p.fire(-1, 0);
+				airTime++;
+			} if (pressed.contains(KeyEvent.VK_RIGHT) && airTime == 0) {
+				p.fire(1, 0);
+				airTime++;
+			} if (pressed.contains(KeyEvent.VK_DOWN) && airTime == 0) {
+				p.fire(0, 1);
+				airTime++;
+			} if (pressed.contains(KeyEvent.VK_SPACE))
+				current.pause();
+
+			if (pressed.contains(KeyEvent.VK_8) || pressed.contains(KeyEvent.VK_NUMPAD8)) {
+				Game.height *= 2;
+				Game.width *= 2;
+				setSize(width, height);
+				p.resize();
+				levels.createRoom();
+				repaint();
+			} if (pressed.contains(KeyEvent.VK_4)) ;
+
+			 if (pressed.contains(KeyEvent.VK_2))
+				loadLevel(2);
+
+			if (pressed.contains(KeyEvent.VK_6) || pressed.contains(KeyEvent.VK_NUMPAD6)) {
+				Game.height /= 2;
+				Game.width /= 2;
+				setSize(width, height);
+				p.resize();
+				levels.createRoom();
+				repaint();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			pressed.remove(e.getKeyCode());
+		}*/

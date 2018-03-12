@@ -172,11 +172,7 @@ public class Player extends Asset {
 	}
 
 	public void resize() {
-		width = size * (int) (Game.width / ratioWidth);
-		height = size * (int) (Game.height / ratioHeight);
-
-		body.width = imageWidth * (width / imageWidth);
-		body.height = imageHeight * (height / imageHeight);
+		super.resize();
 
 		for (Projectile p : proj)
 			p.resize();
